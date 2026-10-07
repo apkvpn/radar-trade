@@ -1,0 +1,21 @@
+{
+  "name": "SHahab Radar",
+  "server": { "host": "0.0.0.0", "port": "process.env.PORT" },
+  "routes": [
+    { "path": "/", "type": "page", "description": "Main application" },
+    { "path": "/api/health", "method": "GET" },
+    { "path": "/api/markets", "method": "GET" },
+    { "path": "/api/markets/top50", "method": "GET" },
+    { "path": "/api/markets/:symbol", "method": "GET" },
+    { "path": "/api/markets/:symbol/:timeframe", "method": "GET" },
+    { "path": "/api/signals", "method": "GET" },
+    { "path": "/api/signals/latest", "method": "GET" },
+    { "path": "/api/signals/:id", "method": "GET" },
+    { "path": "/api/scan", "method": ["GET", "POST"] },
+    { "path": "/api/scan/status", "method": "GET" },
+    { "path": "/api/notifications", "method": ["GET", "POST", "PATCH", "DELETE"] },
+    { "path": "/api/notifications/test", "method": "POST" },
+    { "path": "/api/settings", "method": ["GET", "PUT"] },
+    { "path": "/api/stream", "method": "GET", "description": "Server-Sent Events (realtime signals)" }
+  ]
+}
