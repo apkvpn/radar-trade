@@ -133,12 +133,18 @@ export function computeBands(candles: Candle[]): { mid: number[]; sup: number[];
 }
 
 /**
- * Detect NEW support interactions on CLOSED candles only.
+ * Detect price BREAKOUT FROM support (GREEN LINE) on CLOSED candles only.
+ * 
+ * UPDATED STRATEGY:
  * A signal fires on candle i when:
  *  - candle i and candle i-1 have valid OHLC data,
  *  - candle i is closed (final),
- *  - candle i trades into the support zone,
- *  - candle i-1 did NOT (so a continuing interaction never repeats).
+ *  - candle i-1 was IN the support zone (l <= s),
+ *  - candle i BREAKS OUT ABOVE support (c > s OR h > s),
+ *  - so price exits the green line upward (new breakout).
+ * 
+ * TARGET: Resistance (gray line) = when price touches resistance
+ * STOPLOSS: Previous configured settings (unchanged)
  */
 export function analyze(candles: Candle[]): EngineResult {
   const { mid, sup, res } = computeBands(candles);
@@ -151,9 +157,13 @@ export function analyze(candles: Candle[]): EngineResult {
     const s = sup[i];
     const ps = sup[i - 1];
     if (!Number.isFinite(s) || !Number.isFinite(ps)) continue;
-    const touches = c.l <= s;
+    
+    // Previous candle WAS below/touching support (in the zone)
     const prevTouched = p.l <= ps;
-    if (touches && !prevTouched) {
+    // Current candle BREAKS OUT ABOVE support (price exits green line upward)
+    const breakoutUp = c.c > s || c.h > s;
+    
+    if (prevTouched && breakoutUp) {
       signals.push({ index: i, t: c.t, price: c.c, support: s, mid: mid[i], resistance: res[i] });
     }
   }
