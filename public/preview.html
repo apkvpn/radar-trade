@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SHahab Radar Preview</title>
+    <style>
+      :root {
+        --bg: #f5f6f7;
+        --panel: #ffffff;
+        --line: #e5e7eb;
+        --green: #22c55e;
+        --green-soft: rgba(34, 197, 94, 0.18);
+        --gray: #c3c9d3;
+        --red: #ef4444;
+        --red-soft: rgba(239, 68, 68, 0.12);
+        --black: #111214;
+        --text: #0b0b0c;
+        --muted: #667085;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Tahoma, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .shell {
+        max-width: 1380px;
+        margin: 16px auto;
+        padding: 0 14px 22px;
+      }
+
+      .topbar {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #111214;
+        display: grid;
+        place-items: center;
+        color: #a3e635;
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      .brand-name {
+        font-weight: 800;
+        font-size: 18px;
+      }
+
+      .brand-name .accent { color: #16a34a; }
+
+      .status {
+        background: #ecfeff;
+        color: #0f766e;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .chip {
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .chip.active {
+        background: #111214;
+        color: white;
+      }
+
+      .content {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 14px;
+      }
+
+      .side, .chart-panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      .side .search {
+        padding: 12px 12px 10px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .search input {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 13px;
+        direction: rtl;
+      }
+
+      .filter-row {
+        display: flex;
+        gap: 8px;
+        padding: 10px 12px 12px;
+      }
+
+      .toggle {
+        flex: 1;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: white;
+        padding: 8px 10px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+
+      .toggle.on {
+        background: #a3e635;
+        border-color: #a3e635;
+        color: #111214;
+      }
+
+      .market-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 620px;
+        overflow: auto;
+      }
+
+      .market-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 12px;
+        border-bottom: 1px solid var(--line);
+        cursor: pointer;
+      }
+
+      .market-item.active {
+        background: #f8fafc;
+      }
+
+      .market-name {
+        font-weight: 800;
+        font-size: 14px;
+      }
+
+      .market-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .price-box {
+        font-weight: 800;
+        font-size: 14px;
+      }
+
+      .price-up { color: #16a34a; }
+      .price-down { color: #dc2626; }
+
+      .chart-panel {
+        padding: 0;
+      }
+
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        padding: 12px 14px;
+      }
+
+      .pair-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .pair {
+        font-weight: 900;
+        font-size: 20px;
+      }
+
+      .pair-name {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .price-wrap {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      .live-price {
+        font-weight: 900;
+        font-size: 18px;
+      }
+
+      .change {
+        font-weight: 700;
+        font-size: 12px;
+      }
+
+      .state-pill {
+        background: #dcfce7;
+        color: #166534;
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .state-pill.wait {
+        background: #f3f4f6;
+        color: #374151;
+      }
+
+      .chart-box {
+        position: relative;
+        height: 640px;
+        padding: 16px 24px 10px;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%);
+      }
+
+      svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: transparent;
+      }
+
+      .signal-badge {
+        position: absolute;
+        left: 24px;
+        top: 18px;
+        background: rgba(255,255,255,0.94);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 14px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        max-width: 220px;
+      }
+
+      .badge-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .badge-pill {
+        background: #dcfce7;
+        color: #166534;
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-size: 10px;
+        font-weight: 900;
+      }
+
+      .badge-symbol {
+        font-weight: 900;
+        font-size: 13px;
+      }
+
+      .badge-price {
+        font-size: 22px;
+        font-weight: 900;
+        margin: 8px 0 4px;
+      }
+
+      .badge-time {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        padding: 12px 14px 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .stat {
+        background: #f8fafc;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .stat-value {
+        font-weight: 900;
+        font-size: 14px;
+      }
+
+      @media (max-width: 980px) {
+        .content {
+          grid-template-columns: 1fr;
+        }
+        .chart-box { height: 460px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">R</div>
+          <div class="brand-name">SHahab <span class="accent">Radar</span></div>
+        </div>
+        <div class="toolbar">
+          <span class="status">زنده</span>
+          <button class="chip active">15m</button>
+          <button class="chip">1h</button>
+          <button class="chip">4h</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <aside class="side">
+          <div class="search">
+            <input value="BTC" aria-label="جستجو" />
+          </div>
+          <div class="filter-row">
+            <button class="toggle on">فقط LONG</button>
+            <button class="toggle">اسکن فوری</button>
+          </div>
+          <ul class="market-list" id="marketList"></ul>
+        </aside>
+
+        <section class="chart-panel">
+          <div class="chart-header">
+            <div class="pair-wrap">
+              <span class="pair" id="pair">BTC</span>
+              <span class="pair-name" id="pairName">Bitcoin</span>
+            </div>
+            <div class="price-wrap">
+              <span class="live-price" id="price">$68,420.12</span>
+              <span class="change positive" id="change">+2.46%</span>
+              <span class="state-pill" id="state">LONG</span>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <svg id="chart" viewBox="0 0 900 560" preserveAspectRatio="none" aria-label="market chart"></svg>
+
+            <div class="signal-badge">
+              <div class="badge-top">
+                <span class="badge-pill">▲ LONG</span>
+                <span class="badge-symbol">BTC · 15m</span>
+              </div>
+              <div class="badge-price" id="signalPrice">$68,420.12</div>
+              <div class="badge-time" id="signalTime">2026-10-08 19:30</div>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">Support</div>
+              <div class="stat-value" id="supportValue">$66,580</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Midline</div>
+              <div class="stat-value" id="midValue">$67,950</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Resistance</div>
+              <div class="stat-value" id="resistanceValue">$69,320</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      const marketSeeds = [
+        { symbol: 'BTC', name: 'Bitcoin', price: 68420.12, diff: 2.46 },
+        { symbol: 'ETH', name: 'Ethereum', price: 3520.41, diff: 1.88 },
+        { symbol: 'SOL', name: 'Solana', price: 164.3, diff: 3.11 },
+        { symbol: 'BNB', name: 'BNB', price: 604.4, diff: 1.04 },
+        { symbol: 'XRP', name: 'XRP', price: 0.62, diff: -0.74 },
+        { symbol: 'ADA', name: 'Cardano', price: 0.72, diff: 0.89 }
+      ];
+
+      const chartSvg = document.getElementById('chart');
+      const marketList = document.getElementById('marketList');
+
+      function priceFormat(value) {
+        if (value >= 1000) return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+        if (value >= 1) return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 4 });
+        return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 6 });
+      }
+
+      function renderMarkets() {
+        marketList.innerHTML = marketSeeds.map((m, idx) => `
+          <li class="market-item ${idx === 0 ? 'active' : ''}" data-symbol="${m.symbol}">
+            <div>
+              <div class="market-name">${m.symbol}</div>
+              <div class="market-meta">${m.name}</div>
+            </div>
+            <div class="price-box ${m.diff >= 0 ? 'price-up' : 'price-down'}">${m.diff >= 0 ? '+' : ''}${m.diff.toFixed(2)}%</div>
+          </li>
+        `).join('');
+
+        marketList.querySelectorAll('.market-item').forEach((el) => {
+          el.addEventListener('click', () => {
+            marketList.querySelectorAll('.market-item').forEach((item) => item.classList.remove('active'));
+            el.classList.add('active');
+            const symbol = el.dataset.symbol;
+            const item = marketSeeds.find((m) => m.symbol === symbol);
+            if (!item) return;
+            renderChart(item);
+          });
+        });
+      }
+
+      function buildSeries(base, volatility, count = 60) {
+        const arr = [];
+        let current = base;
+        for (let i = 0; i < count; i++) {
+          const drift = Math.sin(i / 6) * volatility * 0.6;
+          const noise = (Math.random() - 0.5) * volatility * 1.2;
+          current += drift + noise;
+          if (current < base * 0.78) current = base * 0.78;
+          if (current > base * 1.22) current = base * 1.22;
+          arr.push(current);
+        }
+        return arr;
+      }
+
+      function renderChart(item) {
+        const base = item.price;
+        const series = buildSeries(base, item.price * 0.0125);
+        const support = Math.min(...series) * 0.985;
+        const resistance = Math.max(...series) * 1.015;
+        const midline = (support + resistance) / 2;
+
+        document.getElementById('pair').textContent = item.symbol;
+        document.getElementById('pairName').textContent = item.name;
+        document.getElementById('price').textContent = priceFormat(item.price);
+        document.getElementById('change').textContent = `${item.diff >= 0 ? '+' : ''}${item.diff.toFixed(2)}%`;
+        document.getElementById('change').className = `change ${item.diff >= 0 ? 'positive' : 'negative'}`;
+        document.getElementById('state').textContent = 'LONG';
+        document.getElementById('signalPrice').textContent = priceFormat(item.price);
+        document.getElementById('signalTime').textContent = '2026-10-08 19:30';
+        document.getElementById('supportValue').textContent = priceFormat(support);
+        document.getElementById('midValue').textContent = priceFormat(midline);
+        document.getElementById('resistanceValue').textContent = priceFormat(resistance);
+
+        const minY = Math.min(...series, support, midline, resistance) * 0.995;
+        const maxY = Math.max(...series, support, midline, resistance) * 1.005;
+
+        const xStep = 900 / (series.length - 1);
+        let path = '';
+        let path2 = '';
+        let path3 = '';
+
+        series.forEach((point, index) => {
+          const x = index * xStep;
+          const y = 520 - ((point - minY) / (maxY - minY || 1)) * 490;
+          path += `${index === 0 ? 'M' : 'L'} ${x} ${y} `;
+        });
+
+        const supportY = 520 - ((support - minY) / (maxY - minY || 1)) * 490;
+        const midY = 520 - ((midline - minY) / (maxY - minY || 1)) * 490;
+        const resY = 520 - ((resistance - minY) / (maxY - minY || 1)) * 490;
+
+        const supportPoints = [];
+        const midPoints = [];
+        const resPoints = [];
+        for (let i = 0; i < series.length; i++) {
+          const x = i * xStep;
+          supportPoints.push(`${x} ${supportY}`);
+          midPoints.push(`${x} ${midY}`);
+          resPoints.push(`${x} ${resY}`);
+        }
+        path2 = supportPoints.join(' L ');
+        path3 = resPoints.join(' L ');
+
+        const signalX = 720;
+        const lastPrice = series[series.length - 1];
+        const signalY = 520 - ((lastPrice - minY) / (maxY - minY || 1)) * 490;
+
+        chartSvg.innerHTML = `
+          <defs>
+            <linearGradient id="greenZone" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="rgba(34,197,94,0.25)" />
+              <stop offset="100%" stop-color="rgba(34,197,94,0.06)" />
+            </linearGradient>
+            <linearGradient id="redZone" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="rgba(239,68,68,0.16)" />
+              <stop offset="100%" stop-color="rgba(239,68,68,0.03)" />
+            </linearGradient>
+          </defs>
+
+          <g>
+            ${Array.from({ length: 7 }).map((_, i) => {
+              const y = 30 + i * 70;
+              return `<line x1="0" y1="${y}" x2="900" y2="${y}" stroke="#eef2f7" stroke-width="1" />`;
+            }).join('')}
+          </g>
+
+          <path d="M 0 ${supportY} L 900 ${supportY}" stroke="#22c55e" stroke-width="2" fill="none" stroke-dasharray="6 6" />
+          <path d="M 0 ${midY} L 900 ${midY}" stroke="#c3c9d3" stroke-width="2" fill="none" />
+          <path d="M 0 ${resY} L 900 ${resY}" stroke="#ef4444" stroke-width="2" fill="none" stroke-dasharray="6 6" />
+
+          <path d="${path}" fill="none" stroke="#101828" stroke-width="2.2" />
+
+          <g>
+            <circle cx="${signalX}" cy="${signalY}" r="7" fill="#22c55e" stroke="#ffffff" stroke-width="3" />
+            <line x1="${signalX}" y1="${signalY}" x2="${signalX + 26}" y2="${signalY - 26}" stroke="#22c55e" stroke-width="2" />
+          </g>
+        `;
+      }
+
+      renderMarkets();
+      renderChart(marketSeeds[0]);
+    </script>
+  </body>
+</html>
